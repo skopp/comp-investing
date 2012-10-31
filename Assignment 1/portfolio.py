@@ -113,11 +113,11 @@ Creates a fund_report.csv file with the information of a fund created by the sym
 def fund_report(symbols, weights):
     ammount = 1000000
     # Get the close values of each equity
-    close = np.array(get_close(symbols[0]))
+    close = list(np.array(get_close(symbols[0])))
     for symbol in symbols:
         if symbol != symbols[0]:
             n = np.array(get_close(symbol))
-            close = np.vstack((close, n))
+            close = close.append(n)
 
     # Get the cumu_ret of each equity
     cumu_ret = np.array(cumulative_return(close[0]))
@@ -144,7 +144,7 @@ def fund_report(symbols, weights):
 
     # --------------------------------------
     # Write the file
-    c = csv.writer(open("fund_report.csv", "wb"))
+    csv_file = csv.writer(open("fund_report.csv", "wb"))
 
     # Create the header
     row = []
@@ -156,7 +156,7 @@ def fund_report(symbols, weights):
     row.append("Fund Invest")
     row.append("Fund cumu_ret")
     row.append("Fund daily_ret")
-    c.writerow(row)
+    csv_file.writerow(row)
 
     for i in range(len(close[0])):
         row = []
@@ -170,30 +170,37 @@ def fund_report(symbols, weights):
         row.append(fund_cumu[i])
         row.append(fund_daily[i])
         # Write the row
-        c.writerow(row)
+        csv_file.writerow(row)
 
     # Write the summary
-    c.writerow('')
+    csv_file.writerow('')
 
     for i in range(len(symbols)):
-        c.writerow([symbols[i] + " weight: ", weights[i]])
+        csv_file.writerow([symbols[i] + " weight: ", weights[i]])
 
-    c.writerow('')
+    csv_file.writerow('')
 
-    c.writerow(['Annual return', anual_return(fund_inv)])
-    c.writerow(['AVG Daily return', avg_daily_return(fund_inv)])
-    c.writerow(['STD Daily return', std_daily_return(fund_inv)])
-    c.writerow(['Sharpe ratio', sharpe_ratio(fund_inv)])
+    csv_file.writerow(['Annual return', anual_return(fund_inv)])
+    csv_file.writerow(['AVG Daily return', avg_daily_return(fund_inv)])
+    csv_file.writerow(['STD Daily return', std_daily_return(fund_inv)])
+    csv_file.writerow(['Sharpe ratio', sharpe_ratio(fund_inv)])
 
 
 if __name__ == '__main__':
+    symbols = read_symbols("symbols.txt")
     symbols = ['CNC', 'TRGP', 'ROST', 'OKE', 'HUM', 'VFC', 'BIIB', 'MA', 'WCG']
     symbols = ['CNC', 'ROST', 'OKE', 'BIIB'] # Best from previous line
     symbols = ['CNC', 'TRGP', 'ROST', 'OKE', 'HUM', 'VFC', 'BIIB', 'MA', 'WCG', "AAPL", "GLD"]
-    symbols = read_symbols("symbols.txt")
-    #print combine4(symbols)
-    #symbols = ['ROST', 'OKE', 'BIIB', 'GLD'] # Best from previous symbols
-    print combine4(symbols, debugPercent=True, debugPercentValue=0.2)
+    symbols = ['ROST', 'OKE', 'BIIB', 'GLD'] # Best from previous line
+    symbols = ['HDGE', 'AGOL', 'GGGG' ,'SDIV', 'FWDB', 'NKY'] # Best EFT from a site
+    print combine4(symbols, debugPercent=True, debugPercentValue=0.2, debugWinners=True)
     #fund_report(symbols, [0.3, 0.3, 0.2, 0.2])
+
+
+
+
+
+
+
 
 

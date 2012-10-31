@@ -1,15 +1,16 @@
 import itertools
 import numpy as np
 from numpy import genfromtxt
+import matplotlib.mlab as mlab
 import urllib2
 import urllib
 import datetime
 import os
 
 '''
-Downloads the equities imformation from Yahoo Finance
+Downloads the equities information from Yahoo Finance
 '''
-def yahoo_pull(data_path, symbols, start_date, end_date=None):
+def yahoo_pull(symbols, start_date, end_date=None, data_path='./data/'):
     #Create path if it doesn't exist
     if not (os.access(data_path, os.F_OK)):
         os.makedirs(data_path)
@@ -64,16 +65,67 @@ def yahoo_pull(data_path, symbols, start_date, end_date=None):
 
 
 '''
-Get the data of a symbol
+Get the data of a symbol already downloaded
 '''
 def get_data(symbol):
-    return genfromtxt('./data/%s.csv' % symbol, delimiter=',', skip_header=1)
+    #return genfromtxt('./data/%s.csv' % symbol, delimiter=',', skip_header=1)
+    return mlab.csv2rec('./data/%s.csv' % symbol)[::-1] # Reverse
 
 '''
 Get only the close column of a symbol
 '''
 def get_close(symbol):
-    return get_data(symbol)[:, 6][::-1]  # Reverse
+    return get_data(symbol).adj_close
+
+'''
+Completes the data for missing records
+Saves the new files
+'''
+def complete_data(symbols):
+    for symbol in symbols:
+        complete_data_single(symbol, saveNewFile=True)
+
+'''
+Completes the data for missing records can return the array or 
+save a new file
+'''
+def complete_data_single(symbol, saveNewFile=False):
+    good_dates = get_data("SPY").date
+    data = get_data(symbol)
+    dates = data.date
+    
+    # First check if the records from the first days are missing
+    # and fill this data with the record found
+    if not(good_dates[0] in dates):
+        # First find the most recent values that is on the data
+        open_val = data[0][1]
+        high = data[0][2]
+        low = data[0][3]
+        close = data[0][4]
+        volume = data[0][5]
+        adj_close = data[0][6]
+        
+        # Then add that record to the beginning until data starts
+        # it is necesary to modify the date
+        i = 0
+        while not(good_dates[i] in dates):
+            new = (good_dates[i], open_val, high, low, close, volume, adj_close)
+            #n = np.array(most_recent, dtype=data.dtype)
+            data = np.insert(data, i, new, 0)  
+            i = i + 1
+
+    # TODO: Missing values not onthe beginning
+
+    if saveNewFile:
+        try:
+            os.remove('./data/%s - old.csv' % symbol)
+        except:
+            pass
+        os.rename('./data/%s.csv' % symbol, './data/%s - old.csv' % symbol)
+        mlab.rec2csv(data, './data/%s.csv' % symbol, delimiter=',')
+
+    return data
+        
 
 '''
 Calculates the daily return for an array
@@ -146,9 +198,10 @@ def read_symbols(s_symbols_file):
     return symbols
 
 if __name__ == '__main__':
-    symbols = read_symbols('symbolsSPY.txt')
-    symbols = ['CNC', 'TRGP', 'ROST', 'OKE', 'HUM', 'VFC', 'BIIB', 'MA', 'EP', 'WCG']
     symbols = read_symbols('symbols.txt')
+    symbols = ['CNC', 'TRGP', 'ROST', 'OKE', 'HUM', 'VFC', 'BIIB', 'MA', 'EP', 'WCG']
+    symbols = ['HDGE', 'AGOL', 'GGGG' ,'SDIV', 'FWDB', 'NKY'] # Best EFT from a site
     start_date = datetime.date(2011, 1, 1)
     end_date = datetime.date(2011, 12, 31)
-    yahoo_pull('./data/', symbols, start_date, end_date)
+    #yahoo_pull(symbols, start_date, end_date)
+    #complete_data(symbols)
