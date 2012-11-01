@@ -198,7 +198,7 @@ def read_symbols(s_symbols_file):
     return symbols
 
 if __name__ == '__main__':
-    symbols = ['IHE', 'PJP', 'XLU', 'VPU', 'IDU', 'FXG', 'XLP', 'VDC'] # Best ETF stocks for bloomberg
+    symbols = ['COG', 'EP', 'BIIB', 'MA', 'ISRG', 'HUM', 'VFC', 'RRC', 'CMD', 'OKE'] # Best stocks for bloomberg
     start_date = datetime.date(2011, 1, 1)
     end_date = datetime.date(2011, 12, 31)
     yahoo_pull(symbols, start_date, end_date)
