@@ -86,13 +86,13 @@ def combine4(symbols, printPercent=False, printPercentValue=0.1, debugWinners=Fa
             
             if s_new > winner_s:
                 winner = combination
-                winner_weight = weight
+                winner_weights = weights
                 winner_s = s_new
 
                 if debugWinners:
-                    print "%s w/ %s = %s - NEW WINNER" % (str(winner), str(winner_weight), str(winner_s))
+                    print "%s w/ %s = %s - NEW WINNER" % (str(winner), str(winner_weights), str(winner_s))
     
-    return [winner, winner_weight, winner_s]
+    return [winner, winner_weights, winner_s]
 
 '''
 Creates a fund_report.csv file with the information of a fund created by the symbols and weights
@@ -100,11 +100,11 @@ Creates a fund_report.csv file with the information of a fund created by the sym
 def fund_report(symbols, weights):
     ammount = 1000000
     # Get the close values of each equity
-    close = list(np.array(get_close(symbols[0])))
+    close = np.array(get_close(symbols[0]))
     for symbol in symbols:
         if symbol != symbols[0]:
             n = np.array(get_close(symbol))
-            close = close.append(n)
+            close = np.vstack((close, n))
 
     # Get the cumu_ret of each equity
     cumu_ret = np.array(cumulative_return(close[0]))
@@ -126,7 +126,7 @@ def fund_report(symbols, weights):
     # Get the values for the fun
     fund_inv = fund(symbols, weights)
     fund_inv = np.multiply(fund_inv, ammount)
-    fund_cumu = cumulative_return(fund_inv)
+    #fund_cumu = cumulative_return(fund_inv)
     fund_daily = daily_return(fund_inv)
 
     # --------------------------------------
@@ -137,12 +137,12 @@ def fund_report(symbols, weights):
     row = []
     for symbol in symbols:
         row.append(symbol)
-        row.append(symbol + " cumu_ret")
-        row.append(symbol + " investment")
+        row.append(symbol + " Cumulative Return")
+        row.append(symbol + " Investment")
 
-    row.append("Fund Invest")
-    row.append("Fund cumu_ret")
-    row.append("Fund daily_ret")
+    row.append("Portfolio ")
+    #row.append("Portfolio cumu_ret")
+    row.append("Portfolio Daily Return")
     csv_file.writerow(row)
 
     for i in range(len(close[0])):
@@ -154,16 +154,20 @@ def fund_report(symbols, weights):
             row.append(inv[j][i])
         # Add the values of the fund
         row.append(fund_inv[i])
-        row.append(fund_cumu[i])
+        #row.append(fund_cumu[i])
         row.append(fund_daily[i])
         # Write the row
         csv_file.writerow(row)
 
     # Write the summary
     csv_file.writerow('')
+    ammount = 1000000
+    csv_file.writerow(['Ammount', ammount])
+    csv_file.writerow(['Equity', 'Price', 'Percentage', '# Shares'])
 
-    for i in range(len(symbols)):
-        csv_file.writerow([symbols[i] + " weight: ", weights[i]])
+    for weight, i in zip(weights, range(len(symbols))):
+        price = close[i][0]
+        csv_file.writerow([symbols[i], price, weight, (ammount * weight / price)])
 
     csv_file.writerow('')
 
@@ -189,9 +193,10 @@ if __name__ == '__main__':
     symbols = ['COG', 'EP', 'BIIB', 'MA', 'ISRG', 'HUM', 'VFC', 'RRC', 'CMD', 'OKE'] # Best stocks for bloomberg
     symbols = ['EP', 'ISRG', 'CMD', 'OKE'] # Best from previous line
     
-    ans = combine4(symbols, printPercent=True, printPercentValue=0.155, debugWinners=False)
+    #ans = combine4(symbols, printPercent=True, printPercentValue=0.5, debugWinners=False)
+    ans = [('EP', 'ISRG', 'CMD', 'OKE'), (0.1, 0.1, 0.3, 0.5), 2.6618132161761916]
     print ans
-    #fund_report(symbols, [0.3, 0.3, 0.2, 0.2])
+    fund_report(ans[0], ans[1])
 
 
 
