@@ -198,15 +198,10 @@ def read_symbols(s_symbols_file):
     return symbols
 
 if __name__ == '__main__':
-    #symbols = read_symbols('symbols.txt')
-    symbols = ['HDGE', 'AGOL', 'GGGG' ,'SDIV', 'FWDB', 'NKY'] # Best EFT from a site
-    symbols = ['CNC', 'TRGP', 'ROST', 'OKE', 'HUM', 'VFC', 'BIIB', 'MA', 'EP', 'WCG']
-    symbols = ['ROST', 'OKE', 'BIIB', 'GLD'] # Best from previous line
-    symbols = ['BIIB', 'PFE', 'BMY', 'D', 'PM', 'GLD'] # Best for bloomberg
-    symbols = ['BBH', 'IHE', 'PJP', 'XLU', 'VPU', 'IDU', 'FXG', 'PPH', 'XLP', 'VDC'] # Best ETF stocks for bloomberg
+    symbols = ['IHE', 'PJP', 'XLU', 'VPU', 'IDU', 'FXG', 'XLP', 'VDC'] # Best ETF stocks for bloomberg
     start_date = datetime.date(2011, 1, 1)
     end_date = datetime.date(2011, 12, 31)
-    #yahoo_pull(symbols, start_date, end_date)
-    complete_data(symbols)
+    yahoo_pull(symbols, start_date, end_date)
+    #complete_data(symbols)
     
     

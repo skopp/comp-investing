@@ -196,7 +196,7 @@ if __name__ == '__main__':
     symbols = ['ROST', 'OKE', 'BIIB', 'GLD'] # Best from previous line
     symbols = ['BIIB', 'PFE', 'BMY', 'D', 'PM', 'GLD'] # Best stocks for bloomberg
     # [('BIIB', 'BMY', 'PM', 'GLD'), (0.10000000000000001, 0.5, 0.20000000000000001, 0.20000000000000001), 2.1376875820661292] 
-    symbols = ['BBH', 'IHE', 'PJP', 'XLU', 'VPU', 'IDU', 'FXG', 'PPH', 'XLP', 'VDC'] # Best ETF stocks for bloomberg
+    symbols = ['IHE', 'PJP', 'XLU', 'VPU', 'IDU', 'FXG', 'XLP', 'VDC'] # Best ETF stocks for bloomberg
     print combine4(symbols, debugPercent=True, debugPercentValue=0.1, debugWinners=True)
     #fund_report(symbols, [0.3, 0.3, 0.2, 0.2])
 
