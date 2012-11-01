@@ -1,7 +1,8 @@
 import csv
 import itertools
-from utils import *
 import numpy as np
+from utils.stock import *
+from utils.log import PercentPrinter
 
 
 '''
@@ -10,12 +11,10 @@ Returns: array with the daily investment for the fund
 '''
 def fund(symbols, weights):
     ans = 0
-    i = 0
-    for symbol in symbols:
+    for symbol, i in zip(symbols, range(len(symbols))):
         cumu = cumulative_return(get_close(symbol))
         investment = np.multiply(cumu, weights[i])
         ans = np.add(ans, investment)
-        i = i + 1
 
     return ans
 
@@ -23,8 +22,8 @@ def fund(symbols, weights):
 Combinates the given symbols and find the one with the highest sharpe ratio
 Return: Winner [symbols, weights, sharpe_ratio]
 '''
-def combine4(symbols, debugPercent=False, debugPercentValue=0.1, debugWinners=False):
-    # Create a matrix, on each row there is the info of one equity
+def combine4(symbols, printPercent=False, printPercentValue=0.1, debugWinners=False):
+    # Create a matrix, on each row there is the close price of one equity
     data = np.array(get_close(symbols[0]))
     for symbol in symbols:
         if symbol != symbols[0]:
@@ -35,86 +34,65 @@ def combine4(symbols, debugPercent=False, debugPercentValue=0.1, debugWinners=Fa
     combinations = list(itertools.combinations(symbols, 4))
 
     # Get the permutation of the weights, order is important
-    weights = []
-    #weights = weights + list(set(itertools.permutations([1, 0, 0, 0])))
-    #weights = weights + list(set(itertools.permutations([0.9, 0.1, 0, 0])))
-    #weights = weights + list(set(itertools.permutations([0.8, 0.2, 0, 0])))
-    #weights = weights + list(set(itertools.permutations([0.8, 0.1, 0.1, 0])))
-    weights = weights + list(set(itertools.permutations([0.8, 0.1, 0.05, 0.05])))
-    #weights = weights + list(set(itertools.permutations([0.7, 0.3, 0, 0])))
-    #weights = weights + list(set(itertools.permutations([0.7, 0.2, 0.1, 0])))
-    weights = weights + list(set(itertools.permutations([0.7, 0.1, 0.1, 0.1])))
-    #weights = weights + list(set(itertools.permutations([0.6, 0.4, 0, 0])))
-    #weights = weights + list(set(itertools.permutations([0.6, 0.3, 0.1, 0])))
-    weights = weights + list(set(itertools.permutations([0.6, 0.3, 0.05, 0.05])))
-    #weights = weights + list(set(itertools.permutations([0.6, 0.2, 0.2, 0])))
-    weights = weights + list(set(itertools.permutations([0.6, 0.2, 0.1, 0.1])))
-    #weights = weights + list(set(itertools.permutations([0.5, 0.4, 0.1, 0])))
-    weights = weights + list(set(itertools.permutations([0.5, 0.4, 0.05, 0.05])))
-    #weights = weights + list(set(itertools.permutations([0.5, 0.3, 0.2, 0])))
-    weights = weights + list(set(itertools.permutations([0.5, 0.3, 0.1, 0.1])))
-    weights = weights + list(set(itertools.permutations([0.5, 0.2, 0.2, 0.1])))
-    weights = weights + list(set(itertools.permutations([0.25, 0.25, 0.25, 0.25])))
-    weights = weights + list(set(itertools.permutations([0.3, 0.3, 0.2, 0.2])))
-    num_iterations = len(combinations) * len(weights)
-    print "# Iterations: %s" % num_iterations
+    weights_list = []
+    #weights_list = weights_list + list(set(itertools.permutations([1, 0, 0, 0])))
+    #weights_list = weights_list + list(set(itertools.permutations([0.9, 0.1, 0, 0])))
+    #weights_list = weights_list + list(set(itertools.permutations([0.8, 0.2, 0, 0])))
+    #weights_list = weights_list + list(set(itertools.permutations([0.8, 0.1, 0.1, 0])))
+    weights_list = weights_list + list(set(itertools.permutations([0.8, 0.1, 0.05, 0.05])))
+    #weights_list = weights_list + list(set(itertools.permutations([0.7, 0.3, 0, 0])))
+    #weights_list = weights_list + list(set(itertools.permutations([0.7, 0.2, 0.1, 0])))
+    weights_list = weights_list + list(set(itertools.permutations([0.7, 0.1, 0.1, 0.1])))
+    #weights_list = weights_list + list(set(itertools.permutations([0.6, 0.4, 0, 0])))
+    #weights_list = weights_list + list(set(itertools.permutations([0.6, 0.3, 0.1, 0])))
+    weights_list = weights_list + list(set(itertools.permutations([0.6, 0.3, 0.05, 0.05])))
+    #weights_list = weights_list + list(set(itertools.permutations([0.6, 0.2, 0.2, 0])))
+    weights_list = weights_list + list(set(itertools.permutations([0.6, 0.2, 0.1, 0.1])))
+    #weights_list = weights_list + list(set(itertools.permutations([0.5, 0.4, 0.1, 0])))
+    weights_list = weights_list + list(set(itertools.permutations([0.5, 0.4, 0.05, 0.05])))
+    #weights_list = weights_list + list(set(itertools.permutations([0.5, 0.3, 0.2, 0])))
+    weights_list = weights_list + list(set(itertools.permutations([0.5, 0.3, 0.1, 0.1])))
+    weights_list = weights_list + list(set(itertools.permutations([0.5, 0.2, 0.2, 0.1])))
+    weights_list = weights_list + list(set(itertools.permutations([0.25, 0.25, 0.25, 0.25])))
+    weights_list = weights_list + list(set(itertools.permutations([0.3, 0.3, 0.2, 0.2])))
+    num_iterations = len(combinations) * len(weights_list)
 
     # Loop
-    winner = []
-    winner_s = 0
-    if debugPercent == True:
-        percent_data = [debugPercentValue, num_iterations, 0, 0]
+    winner, winner_s = [], 0
+
+    if printPercent:
+        percentPrinter = PercentPrinter(num_iterations, printPercentValue)
         
     for combination in combinations:
-        # Get the rows for each symbol of the combination to filter the matrix
+        # Get the rows number for each symbol of the combination to filter the matrix
         rows = []
         for item in combination:
-            rows = rows + [symbols.index(item)]
+           rows = rows + [symbols.index(item)]
 
-        for weight in weights:
+        for weights in weights_list:
             # Print each X% to see how is going
-            if debugPercent:
-                percent_data = percent_printer(percent_data)
+            if printPercent:
+                percentPrinter.next()
 
             # Create a fund with the selected equities / rows
-            fund = 0
-            i = 0
-            for row in rows:
+            portfolio = 0
+            for row, weight in zip(rows, weights):
                 cumu = cumulative_return(data[row])
-                investment = np.multiply(cumu, weight[i])
-                fund = np.add(fund, investment)
-                i = i + 1
+                investment = np.multiply(cumu, weight)
+                portfolio = np.add(portfolio, investment)
 
             # Calculate the sharpe ratio and see if is higher that the previous
-            s_new = sharpe_ratio(fund)
+            s_new = sharpe_ratio(portfolio)
             
             if s_new > winner_s:
                 winner = combination
                 winner_weight = weight
                 winner_s = s_new
-                if debugWinners == True:
+
+                if debugWinners:
                     print "%s w/ %s = %s - NEW WINNER" % (str(winner), str(winner_weight), str(winner_s))
-            else:
-                pass
-                #print "%s w/ %s = %s" % (str(combination), str(weight), str(s_new))
     
     return [winner, winner_weight, winner_s]
-
-def percent_printer(data):
-    print_each_percent = data[0] # How often is going to print
-    num_iterations = data[1] # Total number of iterations
-    curr_it = data[2] # Current iterations
-    it_next_print = data[3] # The iteration when the next print is going to be made
-    curr_it = curr_it + 1
-    if it_next_print == 0:
-        print 'Starting...'
-        it_next_print = num_iterations * print_each_percent
-    elif curr_it == num_iterations:
-        print '100% complete'
-    elif curr_it > it_next_print:
-        print "%s%% complete" % (100 * it_next_print / num_iterations)
-        it_next_print = it_next_print + (num_iterations * print_each_percent)
-    return [print_each_percent, num_iterations, curr_it, it_next_print]
 
 '''
 Creates a fund_report.csv file with the information of a fund created by the symbols and weights
@@ -211,7 +189,7 @@ if __name__ == '__main__':
     symbols = ['COG', 'EP', 'BIIB', 'MA', 'ISRG', 'HUM', 'VFC', 'RRC', 'CMD', 'OKE'] # Best stocks for bloomberg
     symbols = ['EP', 'ISRG', 'CMD', 'OKE'] # Best from previous line
     
-    ans = combine4(symbols, debugPercent=True, debugPercentValue=0.05, debugWinners=False)
+    ans = combine4(symbols, printPercent=True, printPercentValue=0.155, debugWinners=False)
     print ans
     #fund_report(symbols, [0.3, 0.3, 0.2, 0.2])
 

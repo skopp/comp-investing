@@ -1,11 +1,10 @@
-import itertools
-import numpy as np
-from numpy import genfromtxt
-import matplotlib.mlab as mlab
-import urllib2
-import urllib
-import datetime
 import os
+import datetime
+import urllib
+import urllib2
+import numpy as np
+import matplotlib.mlab as mlab
+
 
 '''
 Downloads the equities information from Yahoo Finance
@@ -201,7 +200,7 @@ if __name__ == '__main__':
     symbols = ['COG', 'EP', 'BIIB', 'MA', 'ISRG', 'HUM', 'VFC', 'RRC', 'CMD', 'OKE'] # Best stocks for bloomberg
     start_date = datetime.date(2011, 1, 1)
     end_date = datetime.date(2011, 12, 31)
-    yahoo_pull(symbols, start_date, end_date)
+    yahoo_pull(symbols, start_date, end_date, data_path='../data/')
     #complete_data(symbols)
     
     
