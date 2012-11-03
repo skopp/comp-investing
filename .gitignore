@@ -1,5 +1,5 @@
+#Python
 *.py[co]
 
-*.sublime*
-
+# Cloud9
 .c9revisions/
